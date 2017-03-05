@@ -4,7 +4,7 @@
 		module="learningrate-build"
 		revision="0.1-SNAPSHOT"
 		status="integration"
-		publication="20170114155909"
+		publication="20161211192709"
 		e:sbtVersion="0.13" e:scalaVersion="2.10"
 	>
 		<description>
