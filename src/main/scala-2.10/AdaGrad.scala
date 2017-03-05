@@ -1,8 +1,8 @@
 import org.apache.spark.mllib.optimization.Updater
 //import org.apache.spark.mllib.linalg.{DenseVector, Vector, Vectors}
 //import breeze.linalg.{Vector => BV, axpy => brzAxpy, norm => brzNorm}
-import org.apache.spark.annotation.DeveloperApi
 import breeze.linalg.{DenseVector => BDV, SparseVector => BSV, Vector => BV, axpy => brzAxpy, norm => brzNorm}
+import org.apache.spark.annotation.DeveloperApi
 import org.apache.spark.mllib.linalg.{DenseVector, SparseVector, Vector}
 
 @DeveloperApi
@@ -11,32 +11,27 @@ final class AdaGrad() extends Updater {
   private[this] var gradientsHistory: Array[Double] = _
 
   override def compute(
-                        weightsOld: Vector,
-                        gradient: Vector,
-                        //weightsOld: Array[Double],
-                        //gradient: Array[Double],
-                        stepSize: Double,
-                        iteration: Int,
-                        regParam: Double
-                      ): (Vector, Double) = {
-
+    weightsOld: Vector,
+    gradient: Vector,
+    stepSize: Double,
+    iter: Int,
+    regParam: Double
+  ): (Vector, Double) = {
     // Update the gradient history
     +=(gradient)
     // Convert old weights into a Breeze dense vector
     val brzWeights: BV[Double] = asBreeze(weightsOld.toArray).toDenseVector
     // Zip the learning rates with the old weights
-    val sumSquareDerivative = inverseVelocity.zip(brzWeights.toArray)
+    val sumSquareDerivative = learningRates.zip(brzWeights.toArray)
     // Calculate new weights
     val newWeights: Array[Double] = sumSquareDerivative.map{
       case (coef, weight) => weight * (1.0 -regParam * coef)}
-
     // Perform the matrices computation
     brzAxpy(-1.0, asBreeze(gradient.toArray), asBreeze(newWeights))
     // Computes the norm
     val norm = brzNorm(brzWeights, 2.0)
-
+    // Return weights and loss
     (fromBreeze(asBreeze(newWeights)), 0.5 * regParam * norm * norm)
-    //(gradient, 0.5)
   }
 
   // Method used to update the gradient history
@@ -53,7 +48,7 @@ final class AdaGrad() extends Updater {
   }
 
   // Compute the array of the new learning rates
-  def inverseVelocity = gradientsHistory.map(1.0/Math.sqrt(_))
+  def learningRates = gradientsHistory.map(1.0/Math.sqrt(_))
 
   def fromBreeze(breezeVector: BV[Double]): Vector = {
     breezeVector match {

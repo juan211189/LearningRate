@@ -20,6 +20,6 @@ object Main {
     val filePath = "inFiles/a9a.txt"
 
     //LogisticRegression.runLogisticRegression(sc, filePath)
-    SVM.runSVM(sc, filePath);
+    SVMImpl.runSVM(sc, filePath);
   }
 }
